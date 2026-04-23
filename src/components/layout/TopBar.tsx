@@ -48,11 +48,11 @@ export function TopBar() {
         <div className="flex items-center gap-4 flex-1">
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 hover:bg-muted/80 px-3 py-1.5 rounded-md transition-colors w-64 border border-border/50"
+            className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 hover:bg-muted/80 px-3 py-1.5 rounded-md transition-colors w-10 md:w-64 border border-border/50 justify-center md:justify-start"
           >
-            <Search className="w-4 h-4" />
-            <span>Search...</span>
-            <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <Search className="w-4 h-4 shrink-0" />
+            <span className="hidden md:inline">Search...</span>
+            <kbd className="hidden md:inline-flex ml-auto pointer-events-none h-5 select-none items-center gap-1 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               M + Space
             </kbd>
           </button>
@@ -73,11 +73,11 @@ export function TopBar() {
 
           <Button
             size="sm"
-            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+            className="h-9 w-9 md:w-auto md:px-3 gap-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full md:rounded-md"
             onClick={() => setQuickAddOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            <span>Quick Add</span>
+            <span className="hidden md:inline">Quick Add</span>
           </Button>
           <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-status-urgent ml-2" title="Logout">
             <LogOut className="w-4 h-4" />

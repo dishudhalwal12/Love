@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/sheet";
 import { 
   Briefcase, Handshake, CheckSquare, FileText, 
-  Workflow, BarChart2, LayoutTemplate, Settings, LogOut 
+  Workflow, BarChart2, LayoutTemplate, Settings, LogOut, Sparkles 
 } from "lucide-react";
+import { AssistantModal } from "@/components/assistant/AssistantModal";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { toast } from "sonner";
@@ -27,7 +28,7 @@ const mainItems = [
   { name: "Pay", href: "/payments", icon: CreditCard },
 ];
 
-const secondaryItems = [
+  { name: "Assistant", href: "#", icon: Sparkles, isAction: true },
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Partners", href: "/partners", icon: Handshake },
   { name: "Tasks", href: "/tasks", icon: CheckSquare },
@@ -41,6 +42,7 @@ const secondaryItems = [
 export function MobileNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -84,17 +86,23 @@ export function MobileNav() {
           </SheetHeader>
           <div className="grid grid-cols-3 gap-4 overflow-y-auto max-h-full pb-20">
             {secondaryItems.map((item) => (
-              <Link
+              <button
                 key={item.name}
-                href={item.href}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  if ((item as any).isAction) {
+                    setAssistantOpen(true);
+                  } else {
+                    window.location.href = item.href;
+                  }
+                  setOpen(false);
+                }}
                 className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.08] transition-all"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <item.icon className="w-5 h-5 text-primary" />
                 </div>
                 <span className="text-[10px] font-medium text-center">{item.name}</span>
-              </Link>
+              </button>
             ))}
             <button
               onClick={() => {
@@ -111,6 +119,7 @@ export function MobileNav() {
           </div>
         </SheetContent>
       </Sheet>
+      <AssistantModal open={assistantOpen} onOpenChange={setAssistantOpen} />
     </div>
   );
 }
