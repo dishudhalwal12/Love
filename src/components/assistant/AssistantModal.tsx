@@ -264,7 +264,7 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
             </p>
           </div>
         </div>
-      </div>
+      </DialogContent>
     </Dialog>
   );
 }
