@@ -1,9 +1,10 @@
-import { pipeline } from '@xenova/transformers';
-
 let transcriber: any = null;
 
 export async function getTranscriber() {
   if (transcriber) return transcriber;
+  
+  // Dynamic import to prevent SSR errors and improve initial bundle size
+  const { pipeline } = await import('@xenova/transformers');
   
   // Use the smallest model for speed and low memory on mobile
   transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
