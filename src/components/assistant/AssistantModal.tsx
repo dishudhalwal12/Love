@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { processAssistantIntent } from "@/features/assistant";
+import { parseLocalIntent } from "@/features/local-assistant";
+import { transcribeAudio } from "@/features/transcriber";
 import { useFirestore } from "@/features/hooks";
 import { Lead, Payment, Order } from "@/features/types";
 import { toast } from "sonner";
@@ -32,7 +33,12 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
   const { add: addPayment } = useFirestore<Payment>("payments");
   const { data: orders, update: updateOrder } = useFirestore<Order>("orders");
 
-  // Web Speech API
+  // Local Whisper ML
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [isModelLoading, setIsModelLoading] = useState(false);
+  const [engineReady, setEngineReady] = useState(false);
+
+  // Initialize Web Speech for live preview ONLY
   const [recognition, setRecognition] = useState<any>(null);
 
   useEffect(() => {
@@ -40,47 +46,78 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
         const rec = new SpeechRecognition();
-        rec.continuous = false;
+        rec.continuous = true;
         rec.interimResults = true;
         rec.lang = "en-IN";
-
         rec.onresult = (event: any) => {
-          const current = event.resultIndex;
-          const transcriptText = event.results[current][0].transcript;
-          setTranscript(transcriptText);
-          if (event.results[current].isFinal) {
-            handleProcessIntent(transcriptText);
+          let current = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            current += event.results[i][0].transcript;
           }
+          setTranscript(current);
         };
-
-        rec.onend = () => setIsListening(false);
         setRecognition(rec);
       }
     }
   }, []);
 
-  const startListening = () => {
-    if (recognition) {
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        setStep("confirming");
+        setIsProcessing(true);
+        try {
+          const text = await transcribeAudio(audioBlob);
+          setTranscript(text);
+          handleProcessIntent(text);
+        } catch (error) {
+          console.error("Transcription error:", error);
+          toast.error("Local transcription failed. Using preview text.");
+          handleProcessIntent(transcript);
+        } finally {
+          setIsProcessing(false);
+        }
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      setMediaRecorder(recorder);
+      recorder.start();
+      recognition?.start();
       setTranscript("");
       setStep("listening");
       setIsListening(true);
-      recognition.start();
-    } else {
-      toast.error("Speech recognition not supported in this browser.");
+    } catch (err) {
+      toast.error("Microphone access denied.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+      recognition?.stop();
+      setIsListening(false);
     }
   };
 
   const handleProcessIntent = async (text: string) => {
     setIsProcessing(true);
-    const result = await processAssistantIntent(text);
+    // Use the local rule-based parser instead of Gemini
+    // This is instant and doesn't require an API key
+    const result = parseLocalIntent(text);
     setIsProcessing(false);
     
     if (result && result.type !== "unknown") {
       setParsedData(result);
       setStep("confirming");
     } else {
-      toast.error("I couldn't quite understand that. Please try again.");
-      setStep("idle");
+      setParsedData(result); // Show the "unknown" state with transcript
+      setStep("confirming");
     }
   };
 
@@ -158,7 +195,7 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
                     <Bot className="w-10 h-10 text-primary" />
                   </div>
                   <p className="text-muted-foreground text-sm font-medium">How can I help you today?</p>
-                  <Button onClick={startListening} size="lg" className="rounded-full px-8 gap-2">
+                  <Button onClick={startRecording} size="lg" className="rounded-full px-8 gap-2">
                     <Mic className="w-4 h-4" /> Start Speaking
                   </Button>
                 </motion.div>
@@ -171,18 +208,26 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="text-center space-y-6 w-full"
                 >
-                  <div className="relative">
                     <motion.div 
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="w-24 h-24 rounded-full bg-primary/10 mx-auto flex items-center justify-center"
+                      className="w-24 h-24 rounded-full bg-primary/10 mx-auto flex items-center justify-center cursor-pointer"
+                      onClick={stopRecording}
                     >
-                      <Mic className="w-12 h-12 text-primary" />
+                      <div className="relative">
+                        <Mic className="w-12 h-12 text-primary" />
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-status-urgent rounded-full animate-pulse" />
+                      </div>
                     </motion.div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-primary font-bold text-lg">Listening...</p>
-                    <p className="text-muted-foreground italic text-sm px-4">"{transcript || "Say something like 'New lead Divyanshu from JIMS'..."}"</p>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <p className="text-primary font-bold text-lg">Listening...</p>
+                      <p className="text-muted-foreground italic text-sm px-4">"{transcript || "Say something..."}"</p>
+                    </div>
+                    <Button variant="outline" onClick={stopRecording} className="rounded-full px-6">
+                      Stop & Process
+                    </Button>
                   </div>
                 </motion.div>
               )}
@@ -250,7 +295,10 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
 
                   <div className="flex gap-3">
                     <Button variant="outline" onClick={() => setStep("idle")} className="flex-1 rounded-2xl h-12">Cancel</Button>
-                    <Button onClick={confirmAction} className="flex-1 rounded-2xl h-12">Confirm & Add</Button>
+                    <Button onClick={confirmAction} disabled={isProcessing} className="flex-1 rounded-2xl h-12">
+                      {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                      {isProcessing ? "Analyzing..." : "Confirm & Add"}
+                    </Button>
                   </div>
                 </motion.div>
               )}
