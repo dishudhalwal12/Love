@@ -198,36 +198,52 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
                     <div className="flex items-center gap-2 text-primary font-bold uppercase text-[10px] tracking-widest">
                       <CheckCircle2 className="w-3 h-3" /> Please Confirm
                     </div>
+
+                    <div className="pb-3 border-b border-white/5">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">What I heard</p>
+                      <p className="text-sm font-medium italic text-white/80">"{transcript}"</p>
+                    </div>
                     
                     {parsedData?.type === "lead" && (
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">New Lead</p>
-                          <p className="text-lg font-bold">{parsedData.name}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold">College</p>
-                            <p className="text-sm">{parsedData.college || "Not specified"}</p>
+                      <div className="space-y-4">
+                        <p className="text-sm font-bold text-primary leading-relaxed">
+                          {parsedData.summary || `Adding lead: ${parsedData.name}`}
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold">College</p>
+                            <p className="text-xs truncate">{parsedData.college || "—"}</p>
                           </div>
-                          <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold">Budget</p>
-                            <p className="text-sm">₹{parsedData.budget || 0}</p>
+                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Budget</p>
+                            <p className="text-xs">₹{parsedData.budget || 0}</p>
                           </div>
                         </div>
                       </div>
                     )}
 
                     {parsedData?.type === "payment" && (
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Payment for Order</p>
-                          <p className="text-lg font-bold">{parsedData.orderId}</p>
+                      <div className="space-y-4">
+                        <p className="text-sm font-bold text-status-success leading-relaxed">
+                          {parsedData.summary || `Recording payment of ₹${parsedData.amount}`}
+                        </p>
+                        <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-status-success/10 flex items-center justify-center">
+                              <CheckCircle2 className="w-4 h-4 text-status-success" />
+                            </div>
+                            <span className="text-xs font-bold text-white">Record Payment</span>
+                          </div>
+                          <span className="text-sm font-bold text-status-success">₹{parsedData.amount}</span>
                         </div>
-                        <div>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Amount</p>
-                          <p className="text-2xl font-bold text-status-success">₹{parsedData.amount}</p>
-                        </div>
+                      </div>
+                    )}
+
+                    {(!parsedData || (parsedData.type !== "lead" && parsedData.type !== "payment")) && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-status-urgent font-medium">
+                          {parsedData?.summary || "I couldn't identify a specific action. Would you like to try again?"}
+                        </p>
                       </div>
                     )}
                   </div>

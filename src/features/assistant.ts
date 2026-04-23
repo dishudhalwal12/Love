@@ -14,11 +14,31 @@ export async function processAssistantIntent(text: string) {
     Input: "${text}"
     
     Extract the intent and data in JSON format.
-    If it's a payment, extract: { "type": "payment", "amount": number, "orderId": string }
-    If it's a lead, extract: { "type": "lead", "name": string, "college": string, "phone": string, "budget": number }
-    If neither, return: { "type": "unknown" }
     
-    Be extremely accurate. Return ONLY the JSON.
+    Rules:
+    1. If it's a payment, provide:
+    { 
+      "type": "payment", 
+      "amount": number, 
+      "orderId": string,
+      "summary": "Record a payment of ₹[amount] for order #[orderId]" 
+    }
+    
+    2. If it's a lead, provide:
+    { 
+      "type": "lead", 
+      "name": string, 
+      "college": string, 
+      "phone": string, 
+      "budget": number,
+      "summary": "Add a new lead: [name] from [college]" 
+    }
+    
+    3. If the intent is unclear or missing fields, try to infer them or mark as "unknown".
+    
+    4. If it's none of the above, return: { "type": "unknown", "summary": "I couldn't identify the action from: ${text}" }
+    
+    Be extremely accurate. Return ONLY the JSON object.
   `;
 
   try {
@@ -28,6 +48,6 @@ export async function processAssistantIntent(text: string) {
     return JSON.parse(jsonStr);
   } catch (error) {
     console.error("Gemini Error:", error);
-    return { type: "error" };
+    return { type: "error", summary: "Failed to process voice input." };
   }
 }
