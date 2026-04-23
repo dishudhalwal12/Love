@@ -300,12 +300,12 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Deadline</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Deadline (Calendar)</p>
                           <Input 
+                            type="date"
                             value={parsedData.deadline || ""} 
                             onChange={(e) => setParsedData({...parsedData, deadline: e.target.value})}
                             className="bg-white/5 border-white/10 h-10 rounded-xl text-xs"
-                            placeholder="e.g. 20th May"
                           />
                         </div>
                       </div>

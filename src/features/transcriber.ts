@@ -1,6 +1,11 @@
 // Polyfill for transformers.js in some environments
 if (typeof window !== 'undefined') {
-  (window as any).process = (window as any).process || { env: {} };
+  // @ts-ignore
+  window.global = window;
+  // @ts-ignore
+  window.process = window.process || { env: {} };
+  // @ts-ignore
+  window.process.env = window.process.env || {};
 }
 
 let transcriber: any = null;
