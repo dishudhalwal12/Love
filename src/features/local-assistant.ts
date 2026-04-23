@@ -59,14 +59,14 @@ export function parseLocalIntent(text: string): ParsedIntent {
     if (deadlineMatch) deadline = deadlineMatch[1];
 
     // Extract Name and College with extreme flexibility
-    const fillers = /\b(there|is|a|got|record|save|add|create|new|lead|enquiry|contact|interested|of|for|person|guy|girl|student|client|someone|called|named|with|the|just|please|can|you|info|data|details|about)\b/gi;
+    const fillers = /\b(there|is|a|got|record|save|add|create|new|lead|enquiry|contact|interested|of|for|person|guy|girl|student|client|someone|called|named|with|the|just|please|can|you|info|data|details|about|ambassador|associate|partner|promoter|collaborator)\b/gi;
     const cleanInput = input.replace(fillers, "").trim();
     
     // Multi-strategy splitting
     let splitStrategyFound = false;
 
-    // Strategy A: "from" or "at" or "in"
-    const splitters = /\s+(from|at|in|of|belongs to|studying at|location is|college is)\s+/i;
+    // Strategy A: "from" or "at" or "in" or "belongs to"
+    const splitters = /\s+(from|at|in|of|belongs to|studying at|location is|college is|lives in)\s+/i;
     const parts = cleanInput.split(splitters);
     if (parts.length >= 3) {
       name = parts[0].trim();
@@ -74,7 +74,17 @@ export function parseLocalIntent(text: string): ParsedIntent {
       splitStrategyFound = true;
     }
 
-    // Strategy B: If no clear splitter, assume "Name [Location]" if name is multiple words
+    // Strategy B: "is from" or "is at"
+    if (!splitStrategyFound) {
+      const isMatch = cleanInput.match(/(.+?)\s+is\s+(?:from|at|in)\s+(.+)/i);
+      if (isMatch) {
+        name = isMatch[1].trim();
+        college = isMatch[2].trim();
+        splitStrategyFound = true;
+      }
+    }
+
+    // Strategy C: If no clear splitter, assume "Name [Location]" if name is multiple words
     if (!splitStrategyFound) {
       const words = cleanInput.split(" ");
       if (words.length >= 3) {
@@ -91,13 +101,13 @@ export function parseLocalIntent(text: string): ParsedIntent {
     
     if (name && name.length > 1) {
       return {
-        type: "lead",
+        type: input.includes("partner") ? "partner" : "lead",
         name: capitalize(name),
         college: college ? capitalize(college) : "Unknown",
         phone,
         source: capitalize(source),
         deadline: deadline ? capitalize(deadline) : undefined,
-        summary: `Add lead: ${capitalize(name)} from ${college ? capitalize(college) : "Unknown"}`
+        summary: `Add ${input.includes("partner") ? "partner" : "lead"}: ${capitalize(name)} from ${college ? capitalize(college) : "Unknown"}`
       };
     }
   }
