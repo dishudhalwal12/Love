@@ -208,18 +208,17 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="text-center space-y-6 w-full"
                 >
-                    <motion.div 
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="w-24 h-24 rounded-full bg-primary/10 mx-auto flex items-center justify-center cursor-pointer"
-                      onClick={stopRecording}
-                    >
-                      <div className="relative">
-                        <Mic className="w-12 h-12 text-primary" />
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-status-urgent rounded-full animate-pulse" />
-                      </div>
-                    </motion.div>
-                  </div>
+                  <motion.div 
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-24 h-24 rounded-full bg-primary/10 mx-auto flex items-center justify-center cursor-pointer"
+                    onClick={stopRecording}
+                  >
+                    <div className="relative">
+                      <Mic className="w-12 h-12 text-primary" />
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-status-urgent rounded-full animate-pulse" />
+                    </div>
+                  </motion.div>
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <p className="text-primary font-bold text-lg">Listening...</p>
