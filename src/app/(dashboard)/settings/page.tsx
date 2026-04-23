@@ -10,13 +10,15 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Save, Loader2, Webhook, Settings2, Moon, MessageCircle,
-  DollarSign, Calendar, Clock, Trophy,
+  DollarSign, Calendar, Clock, Trophy, Trash2, AlertTriangle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { resetActivityLogs } from "@/features/activity";
 
 export default function SettingsPage() {
   const { settings, loading, updateSettings } = useSettings();
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [formData, setFormData] = useState<any>(null);
 
   useEffect(() => {
@@ -35,6 +37,20 @@ export default function SettingsPage() {
       toast.error("Failed to save settings");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleResetFeed = async () => {
+    if (!confirm("Are you sure you want to clear the entire Intelligence Feed? This cannot be undone.")) return;
+
+    setResetting(true);
+    try {
+      await resetActivityLogs();
+      toast.success("Intelligence Feed has been reset.");
+    } catch {
+      toast.error("Failed to reset feed.");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -383,6 +399,37 @@ export default function SettingsPage() {
                 />
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        {/* Maintenance & Data */}
+        <Card className="bg-card border-border/40 shadow-sm border-status-urgent/20">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <Trash2 className="w-5 h-5 text-status-urgent" />
+              <CardTitle>Maintenance & Data</CardTitle>
+            </div>
+            <CardDescription>Advanced actions for system maintenance.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-status-urgent/5 rounded-lg border border-status-urgent/10">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-status-urgent" />
+                  <span className="font-medium text-sm">Reset Intelligence Feed</span>
+                </div>
+                <p className="text-xs text-muted-foreground">Clear all activity logs and start with a fresh feed. Leads and orders are NOT affected.</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-status-urgent/30 text-status-urgent hover:bg-status-urgent hover:text-white transition-all"
+                onClick={handleResetFeed}
+                disabled={resetting}
+              >
+                {resetting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Reset Feed"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

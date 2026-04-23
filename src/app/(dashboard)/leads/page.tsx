@@ -482,10 +482,10 @@ export default function LeadsPage() {
                         <Badge
                           variant="secondary"
                           className={`font-medium cursor-pointer ${lead.status === "Booked" ? "bg-status-success/20 text-status-success border-status-success/30" :
-                              lead.status === "New" ? "bg-status-active/20 text-status-active border-status-active/30" :
-                                lead.status === "Lost" ? "bg-muted text-muted-foreground border-border/50" :
-                                  lead.status === "Interested" || lead.status === "Contacted" ? "bg-primary/20 text-primary border-primary/30" :
-                                    "bg-status-pending/20 text-status-pending border-status-pending/30"
+                            lead.status === "New" ? "bg-status-active/20 text-status-active border-status-active/30" :
+                              lead.status === "Lost" ? "bg-muted text-muted-foreground border-border/50" :
+                                lead.status === "Interested" || lead.status === "Contacted" ? "bg-primary/20 text-primary border-primary/30" :
+                                  "bg-status-pending/20 text-status-pending border-status-pending/30"
                             } border`}
                         >
                           {statusChangingId === lead.id ? <Loader2 className="w-3 h-3 animate-spin" /> : lead.status}
@@ -576,9 +576,9 @@ export default function LeadsPage() {
                       <Badge
                         variant="secondary"
                         className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${lead.status === "Booked" ? "bg-status-success/20 text-status-success border-status-success/20" :
-                            lead.status === "New" ? "bg-status-active/20 text-status-active border-status-active/20" :
-                              lead.status === "Lost" ? "bg-muted text-muted-foreground border-border/50" :
-                                "bg-primary/20 text-primary border-primary/20"
+                          lead.status === "New" ? "bg-status-active/20 text-status-active border-status-active/20" :
+                            lead.status === "Lost" ? "bg-muted text-muted-foreground border-border/50" :
+                              "bg-primary/20 text-primary border-primary/20"
                           } border`}
                       >
                         {statusChangingId === lead.id ? <Loader2 className="w-3 h-3 animate-spin" /> : lead.status}

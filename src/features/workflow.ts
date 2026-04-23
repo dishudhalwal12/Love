@@ -119,8 +119,8 @@ export const computeLeadPriorityScore = (lead: Partial<Lead>): number => {
     typeof lead.budget === "number"
       ? lead.budget
       : Number(
-          (lead.budget as unknown as string)?.replace(/[^0-9]/g, "") || 0
-        );
+        (lead.budget as unknown as string)?.replace(/[^0-9]/g, "") || 0
+      );
   if (budgetVal > 5000) score += 20;
   else if (budgetVal > 2000) score += 10;
   else if (budgetVal < 500) score -= 10;
@@ -254,8 +254,8 @@ export const convertLeadToOrder = async (
       typeof lead.budget === "number"
         ? lead.budget
         : Number(
-            (lead.budget as unknown as string)?.replace(/[^0-9]/g, "") || 0
-          ),
+          (lead.budget as unknown as string)?.replace(/[^0-9]/g, "") || 0
+        ),
     amountPaid: 0,
     status: "Booked",
     deadline: lead.deadline,

@@ -40,6 +40,32 @@ export const deleteActivityLogs = async (targetId: string) => {
   }
 };
 
+/**
+ * Deletes ALL activity logs.
+ */
+export const resetActivityLogs = async () => {
+  try {
+    const snapshot = await getDocs(collection(db, "activity_logs"));
+    const batch = writeBatch(db);
+    let count = 0;
+
+    // Firestore batch limit is 500
+    for (const d of snapshot.docs) {
+      batch.delete(doc(db, "activity_logs", d.id));
+      count++;
+      if (count === 500) break;
+    }
+
+    await batch.commit();
+
+    // If there are more, we could recursively call or just inform.
+    // For MVP, 500 is usually plenty of history.
+  } catch (error) {
+    console.error("Failed to reset activity logs:", error);
+    throw error;
+  }
+};
+
 // Typed activity helpers for common events
 export const activityEvents = {
   leadCreated: (leadId: string, name: string, college: string) =>

@@ -205,11 +205,10 @@ export default function PartnersPage() {
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={`text-xs ${
-                        partner.status === "Inactive"
+                      className={`text-xs ${partner.status === "Inactive"
                           ? "bg-status-urgent/10 text-status-urgent border-status-urgent/30"
                           : "bg-status-success/10 text-status-success border-status-success/30"
-                      }`}
+                        }`}
                     >
                       {partner.status}
                     </Badge>

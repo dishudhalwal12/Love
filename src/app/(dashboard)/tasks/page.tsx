@@ -54,7 +54,7 @@ export default function TasksPage() {
 
       // Log activity when task moved to done
       if (isDoneColumn && !wasDone) {
-        await activityEvents.taskCompleted(taskObj.title);
+        await activityEvents.taskCompleted(taskObj.id!, taskObj.title);
         toast.success(`✅ "${taskObj.title.slice(0, 30)}" completed!`);
       }
     } catch {

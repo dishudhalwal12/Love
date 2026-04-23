@@ -86,11 +86,11 @@ export default function AnalyticsPage() {
         <Card className="bg-card border-border/40 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <span className="text-status-success font-semibold">₹</span> Revenue Collected
+              <DollarSign className="w-4 h-4" /> Revenue Collected
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-semibold text-status-success">₹{totalRevenue.toLocaleString()}</div>
+            <div className="text-3xl font-semibold text-status-success">${totalRevenue}</div>
           </CardContent>
         </Card>
 
@@ -101,7 +101,7 @@ export default function AnalyticsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-semibold">₹{avgOrderValue.toLocaleString()}</div>
+            <div className="text-3xl font-semibold">${avgOrderValue}</div>
           </CardContent>
         </Card>
 

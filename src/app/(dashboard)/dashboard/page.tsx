@@ -235,7 +235,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 md:gap-6">
 
         {/* LEFT: KPI Cards */}
         <div className="xl:col-span-3 flex flex-row xl:flex-col gap-4 overflow-x-auto xl:overflow-x-visible pb-2 xl:pb-0 scrollbar-hide snap-x">
@@ -358,8 +358,8 @@ export default function DashboardPage() {
                   const href = getLogLink(log.type);
 
                   return (
-                    <Link 
-                      key={log.id} 
+                    <Link
+                      key={log.id}
                       href={href}
                       className="py-3 hover:bg-white/[0.05] px-2 -mx-2 rounded-lg transition-colors flex items-start gap-3 border-b border-white/[0.05] last:border-0"
                     >
