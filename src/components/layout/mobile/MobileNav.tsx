@@ -74,11 +74,9 @@ export function MobileNav() {
       })}
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <button className="flex flex-col items-center gap-1 flex-1 py-1 text-muted-foreground">
-            <Menu className="w-5 h-5" />
-            <span className="text-[10px] font-medium tracking-tight">More</span>
-          </button>
+        <SheetTrigger render={<button className="flex flex-col items-center gap-1 flex-1 py-1 text-muted-foreground" />}>
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px] font-medium tracking-tight">More</span>
         </SheetTrigger>
         <SheetContent side="bottom" className="h-[70vh] bg-card border-t border-border/50 rounded-t-3xl p-6">
           <SheetHeader className="mb-6">
