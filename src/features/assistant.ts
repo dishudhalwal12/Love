@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 
 export async function processAssistantIntent(text: string) {
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   const prompt = `
     Analyze the following user voice input for an operations dashboard called "LOVE.".
@@ -42,12 +42,18 @@ export async function processAssistantIntent(text: string) {
   `;
 
   try {
+    if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+      throw new Error("Gemini API Key is missing in environment variables.");
+    }
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const jsonStr = response.text().replace(/```json|```/g, "").trim();
     return JSON.parse(jsonStr);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini Error:", error);
-    return { type: "error", summary: "Failed to process voice input." };
+    return { 
+      type: "error", 
+      summary: `Gemini Error: ${error.message || "Failed to process voice input."}` 
+    };
   }
 }
