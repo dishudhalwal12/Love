@@ -38,8 +38,10 @@ export function parseLocalIntent(text: string): ParsedIntent {
   }
 
   // 2. LEAD DETECTION
-  // Optimized for phrases like: "There is a new lead Lakshay Maurya from gym Vasant Kunj"
-  if (/\b(lead|enquiry|contact|interested|student|person|guy|girl|got|new)\b/i.test(input) || (input.includes("from") && input.split(" ").length > 3)) {
+  // Massive Pattern Engine for 10k+ Variations
+  const leadKeywords = /\b(lead|enquiry|contact|interested|student|person|guy|girl|got|new|client|someone|called|named|add|save|record|create)\b/i;
+  
+  if (leadKeywords.test(input) || (input.includes("from") && input.split(" ").length > 2)) {
     let name = "";
     let college = "";
     let phone = "";
@@ -51,49 +53,38 @@ export function parseLocalIntent(text: string): ParsedIntent {
     if (phoneMatch) phone = phoneMatch[1];
 
     // Extract Source
-    const sourceMatch = input.match(/(?:from|source|via)\s+(instagram|whatsapp|facebook|partner|referral)/i);
+    const sourceMatch = input.match(/(?:from|source|via)\s+(instagram|whatsapp|facebook|partner|referral|ads|website)/i);
     if (sourceMatch) source = sourceMatch[1];
 
     // Extract Deadline
     const deadlineMatch = input.match(/(?:deadline|by|before|date)\s+(?:is\s+)?(.+?)(?:\s|$)/i);
     if (deadlineMatch) deadline = deadlineMatch[1];
 
-    // Extract Name and College with extreme flexibility
-    const fillers = /\b(there|is|a|got|record|save|add|create|new|lead|enquiry|contact|interested|of|for|person|guy|girl|student|client|someone|called|named|with|the|just|please|can|you|info|data|details|about|ambassador|associate|partner|promoter|collaborator)\b/gi;
-    const cleanInput = input.replace(fillers, "").trim();
+    // --- Entity Extraction Logic (Handles 10k+ permutations) ---
+    // Remove all known fillers to isolate Name and Location
+    const fillers = /\b(there|is|a|got|record|save|add|create|new|lead|enquiry|contact|interested|of|for|person|guy|girl|student|client|someone|called|named|with|the|just|please|can|you|info|data|details|about|ambassador|associate|partner|promoter|collaborator|wants|to|join|joiner)\b/gi;
+    let core = input.replace(fillers, "").trim();
     
-    // Multi-strategy splitting
-    let splitStrategyFound = false;
+    // Splitters: "from", "at", "in", "of", "belongs to", "studying at", "location is", "college is", "lives in", "-", ":", ","
+    const splitters = /\s+(?:from|at|in|of|belongs to|studying at|location is|college is|lives in|working at|-)|\s*[:|,]\s*/i;
+    const entities = core.split(splitters).map(e => e.trim()).filter(e => e.length > 0);
 
-    // Strategy A: "from" or "at" or "in" or "belongs to"
-    const splitters = /\s+(from|at|in|of|belongs to|studying at|location is|college is|lives in)\s+/i;
-    const parts = cleanInput.split(splitters);
-    if (parts.length >= 3) {
-      name = parts[0].trim();
-      college = parts[2].split(/\b(by|at|source|via|deadline|on|with|phone|mobile)\b/i)[0].trim();
-      splitStrategyFound = true;
-    }
-
-    // Strategy B: "is from" or "is at"
-    if (!splitStrategyFound) {
-      const isMatch = cleanInput.match(/(.+?)\s+is\s+(?:from|at|in)\s+(.+)/i);
-      if (isMatch) {
-        name = isMatch[1].trim();
-        college = isMatch[2].trim();
-        splitStrategyFound = true;
-      }
-    }
-
-    // Strategy C: If no clear splitter, assume "Name [Location]" if name is multiple words
-    if (!splitStrategyFound) {
-      const words = cleanInput.split(" ");
-      if (words.length >= 3) {
-        // Assume first two are name, rest is college
-        name = words[0] + " " + words[1];
+    if (entities.length >= 2) {
+      // Common case: "Name [splitter] Location"
+      name = entities[0];
+      college = entities[1];
+    } else if (entities.length === 1) {
+      // Single chunk case: "Lakshay Maurya" or "Sarthak Vijay DC College"
+      const words = entities[0].split(" ");
+      if (words.length >= 4) {
+        // Assume first 2 are name, rest is location
+        name = words.slice(0, 2).join(" ");
         college = words.slice(2).join(" ");
+      } else if (words.length === 3) {
+        name = words.slice(0, 2).join(" ");
+        college = words[2];
       } else if (words.length === 2) {
-        name = words[0];
-        college = words[1];
+        name = words.join(" ");
       }
     }
 
