@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { parseLocalIntent } from "@/features/local-assistant";
 import { useFirestore } from "@/features/hooks";
-import { Lead, Payment, Order } from "@/features/types";
+import { Lead, Payment, Order, ActivityLog } from "@/features/types";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
