@@ -59,33 +59,37 @@ export function parseLocalIntent(text: string): ParsedIntent {
     if (deadlineMatch) deadline = deadlineMatch[1];
 
     // Extract Name and College with extreme flexibility
-    const cleanInput = input.replace(/\b(there|is|a|got|record|save|add|create|new|lead|enquiry|contact|interested|of|for)\b/gi, "").trim();
+    const fillers = /\b(there|is|a|got|record|save|add|create|new|lead|enquiry|contact|interested|of|for|person|guy|girl|student|client|someone|called|named|with|the|just|please|can|you|info|data|details|about)\b/gi;
+    const cleanInput = input.replace(fillers, "").trim();
     
-    // Pattern: [Name] from [Location]
-    if (cleanInput.includes("from")) {
-      const parts = cleanInput.split(/\s+from\s+/i);
-      if (parts.length >= 2) {
-        name = parts[0].trim();
-        college = parts[1].split(/\b(by|at|source|via|deadline|on|with|phone|mobile)\b/i)[0].trim();
-      }
-    } else if (cleanInput.includes("at")) {
-      const parts = cleanInput.split(/\s+at\s+/i);
-      if (parts.length >= 2) {
-        name = parts[0].trim();
-        college = parts[1].trim();
-      }
-    } else {
-      // Fallback: take first two words as name if no location found
+    // Multi-strategy splitting
+    let splitStrategyFound = false;
+
+    // Strategy A: "from" or "at" or "in"
+    const splitters = /\s+(from|at|in|of|belongs to|studying at|location is|college is)\s+/i;
+    const parts = cleanInput.split(splitters);
+    if (parts.length >= 3) {
+      name = parts[0].trim();
+      college = parts[2].split(/\b(by|at|source|via|deadline|on|with|phone|mobile)\b/i)[0].trim();
+      splitStrategyFound = true;
+    }
+
+    // Strategy B: If no clear splitter, assume "Name [Location]" if name is multiple words
+    if (!splitStrategyFound) {
       const words = cleanInput.split(" ");
-      if (words.length >= 2) {
+      if (words.length >= 3) {
+        // Assume first two are name, rest is college
         name = words[0] + " " + words[1];
         college = words.slice(2).join(" ");
+      } else if (words.length === 2) {
+        name = words[0];
+        college = words[1];
       }
     }
 
     const capitalize = (s: string) => s.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     
-    if (name && name.length > 2) {
+    if (name && name.length > 1) {
       return {
         type: "lead",
         name: capitalize(name),
@@ -99,8 +103,8 @@ export function parseLocalIntent(text: string): ParsedIntent {
   }
 
   // 3. PARTNER DETECTION
-  if (/\b(partner|ambassador|associate|promoter)\b/i.test(input)) {
-    const nameMatch = input.match(/(?:partner|ambassador|associate|promoter|name)\s+(?:is\s+)?(.+?)(?:\s+|$)/i);
+  if (/\b(partner|ambassador|associate|promoter|collaborator)\b/i.test(input)) {
+    const nameMatch = input.match(/(?:partner|ambassador|associate|promoter|collaborator|name)\s+(?:is\s+)?(.+?)(?:\s+|$)/i);
     if (nameMatch) {
       const name = nameMatch[1];
       return {

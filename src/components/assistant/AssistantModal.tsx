@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { parseLocalIntent } from "@/features/local-assistant";
 import { transcribeAudio } from "@/features/transcriber";
 import { useFirestore } from "@/features/hooks";
@@ -255,49 +256,79 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
                     
                     {parsedData?.type === "lead" && (
                       <div className="space-y-4">
-                        <p className="text-sm font-bold text-primary leading-relaxed">
-                          {parsedData.summary || `Adding lead: ${parsedData.name}`}
-                        </p>
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Lead Name</p>
+                          <Input 
+                            value={parsedData.name || ""} 
+                            onChange={(e) => setParsedData({...parsedData, name: e.target.value})}
+                            className="bg-white/5 border-white/10 h-10 rounded-xl focus:ring-primary"
+                          />
+                        </div>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold">College</p>
-                            <p className="text-xs truncate">{parsedData.college || "—"}</p>
+                          <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">College</p>
+                            <Input 
+                              value={parsedData.college || ""} 
+                              onChange={(e) => setParsedData({...parsedData, college: e.target.value})}
+                              className="bg-white/5 border-white/10 h-10 rounded-xl text-xs"
+                            />
                           </div>
-                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Budget</p>
-                            <p className="text-xs">₹{parsedData.budget || 0}</p>
+                          <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Budget</p>
+                            <Input 
+                              type="number"
+                              value={parsedData.budget || 0} 
+                              onChange={(e) => setParsedData({...parsedData, budget: parseInt(e.target.value) || 0})}
+                              className="bg-white/5 border-white/10 h-10 rounded-xl text-xs"
+                            />
                           </div>
-                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Source</p>
-                            <p className="text-xs truncate">{parsedData.source || "Direct"}</p>
+                          <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Source</p>
+                            <Input 
+                              value={parsedData.source || "Direct"} 
+                              onChange={(e) => setParsedData({...parsedData, source: e.target.value})}
+                              className="bg-white/5 border-white/10 h-10 rounded-xl text-xs"
+                            />
                           </div>
-                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Phone</p>
-                            <p className="text-xs truncate">{parsedData.phone || "—"}</p>
+                          <div className="space-y-1">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Phone</p>
+                            <Input 
+                              value={parsedData.phone || ""} 
+                              onChange={(e) => setParsedData({...parsedData, phone: e.target.value})}
+                              className="bg-white/5 border-white/10 h-10 rounded-xl text-xs"
+                            />
                           </div>
                         </div>
-                        {parsedData.deadline && (
-                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
-                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Deadline</p>
-                            <p className="text-xs">{parsedData.deadline}</p>
-                          </div>
-                        )}
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Deadline</p>
+                          <Input 
+                            value={parsedData.deadline || ""} 
+                            onChange={(e) => setParsedData({...parsedData, deadline: e.target.value})}
+                            className="bg-white/5 border-white/10 h-10 rounded-xl text-xs"
+                            placeholder="e.g. 20th May"
+                          />
+                        </div>
                       </div>
                     )}
 
                     {parsedData?.type === "payment" && (
                       <div className="space-y-4">
-                        <p className="text-sm font-bold text-status-success leading-relaxed">
-                          {parsedData.summary || `Recording payment of ₹${parsedData.amount}`}
-                        </p>
-                        <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-status-success/10 flex items-center justify-center">
-                              <CheckCircle2 className="w-4 h-4 text-status-success" />
-                            </div>
-                            <span className="text-xs font-bold text-white">Record Payment</span>
-                          </div>
-                          <span className="text-sm font-bold text-status-success">₹{parsedData.amount}</span>
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Order ID</p>
+                          <Input 
+                            value={parsedData.orderId || ""} 
+                            onChange={(e) => setParsedData({...parsedData, orderId: e.target.value.toUpperCase()})}
+                            className="bg-white/5 border-white/10 h-10 rounded-xl focus:ring-status-success"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] text-muted-foreground uppercase font-bold px-1">Amount</p>
+                          <Input 
+                            type="number"
+                            value={parsedData.amount || 0} 
+                            onChange={(e) => setParsedData({...parsedData, amount: parseInt(e.target.value) || 0})}
+                            className="bg-white/5 border-white/10 h-12 rounded-xl text-lg font-bold text-status-success"
+                          />
                         </div>
                       </div>
                     )}
