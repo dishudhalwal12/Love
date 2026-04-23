@@ -28,6 +28,7 @@ const mainItems = [
   { name: "Pay", href: "/payments", icon: CreditCard },
 ];
 
+const secondaryItems = [
   { name: "Assistant", href: "#", icon: Sparkles, isAction: true },
   { name: "Projects", href: "/projects", icon: Briefcase },
   { name: "Partners", href: "/partners", icon: Handshake },
