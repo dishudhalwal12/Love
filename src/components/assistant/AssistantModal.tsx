@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { parseLocalIntent } from "@/features/local-assistant";
-import { transcribeAudio } from "@/features/transcriber";
 import { useFirestore } from "@/features/hooks";
 import { Lead, Payment, Order } from "@/features/types";
 import { toast } from "sonner";
@@ -61,59 +60,45 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
         rec.continuous = true;
         rec.interimResults = true;
         rec.lang = "en-IN";
+        
         rec.onresult = (event: any) => {
-          let current = "";
+          let interimTranscript = "";
           for (let i = event.resultIndex; i < event.results.length; ++i) {
-            current += event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              setTranscript(event.results[i][0].transcript);
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+              setTranscript(interimTranscript);
+            }
           }
-          setTranscript(current);
         };
+
+        rec.onend = () => {
+          // If we were listening, restart it unless explicitly stopped
+          if (isListening) rec.start();
+        };
+
         setRecognition(rec);
       }
     }
-  }, []);
+  }, [isListening]);
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
-
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.onstop = async () => {
-        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-        setStep("confirming");
-        setIsProcessing(true);
-        try {
-          const text = await transcribeAudio(audioBlob);
-          setTranscript(text);
-          handleProcessIntent(text);
-        } catch (error) {
-          console.error("Transcription error:", error);
-          toast.error("Local transcription failed. Using preview text.");
-          handleProcessIntent(transcript);
-        } finally {
-          setIsProcessing(false);
-        }
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      setMediaRecorder(recorder);
-      recorder.start();
-      recognition?.start();
+  const startRecording = () => {
+    if (recognition) {
       setTranscript("");
       setStep("listening");
       setIsListening(true);
-    } catch (err) {
-      toast.error("Microphone access denied.");
+      recognition.start();
+    } else {
+      toast.error("Speech recognition not supported in this browser.");
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
-      recognition?.stop();
+    if (recognition) {
+      recognition.stop();
       setIsListening(false);
+      handleProcessIntent(transcript);
     }
   };
 
