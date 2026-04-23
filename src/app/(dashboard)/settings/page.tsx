@@ -2,11 +2,16 @@
 
 import { useSettings } from "@/context/SettingsContext";
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Save, Loader2, Webhook, Settings2, Moon, MessageCircle } from "lucide-react";
+import {
+  Save, Loader2, Webhook, Settings2, Moon, MessageCircle,
+  DollarSign, Calendar, Clock, Trophy,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
@@ -26,7 +31,7 @@ export default function SettingsPage() {
     try {
       await updateSettings(formData);
       toast.success("Settings saved successfully!");
-    } catch (e) {
+    } catch {
       toast.error("Failed to save settings");
     } finally {
       setSaving(false);
@@ -43,7 +48,35 @@ export default function SettingsPage() {
   const updateTemplate = (id: string, text: string) => {
     setFormData((prev: any) => ({
       ...prev,
-      whatsappTemplates: prev.whatsappTemplates.map((t: any) => t.id === id ? { ...t, text } : t),
+      whatsappTemplates: prev.whatsappTemplates.map((t: any) =>
+        t.id === id ? { ...t, text } : t
+      ),
+    }));
+  };
+
+  const updateCommissionSlab = (idx: number, field: string, value: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      commissionSlabs: prev.commissionSlabs.map((s: any, i: number) =>
+        i === idx ? { ...s, [field]: value } : s
+      ),
+    }));
+  };
+
+  const addCommissionSlab = () => {
+    setFormData((prev: any) => ({
+      ...prev,
+      commissionSlabs: [
+        ...(prev.commissionSlabs || []),
+        { minLeads: 1, maxLeads: 5, percentage: 10 },
+      ],
+    }));
+  };
+
+  const removeCommissionSlab = (idx: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      commissionSlabs: prev.commissionSlabs.filter((_: any, i: number) => i !== idx),
     }));
   };
 
@@ -55,11 +88,13 @@ export default function SettingsPage() {
     );
   }
 
-  // Ensure default webhooks exist in state
-  const webhooks = ["N8N_NEW_LEAD_WEBHOOK", "N8N_PAYMENT_WEBHOOK", "N8N_SYNOPSIS_WEBHOOK"].map(name => {
+  const webhooks = ["N8N_NEW_LEAD_WEBHOOK", "N8N_PAYMENT_WEBHOOK", "N8N_SYNOPSIS_WEBHOOK"].map((name) => {
     const existing = formData.webhookUrls?.find((w: any) => w.name === name);
     return existing || { name, url: "" };
   });
+
+  // Ensure defaultTaskTimings exists
+  const taskTimings = formData.defaultTaskTimings || { followUpHours: 2, synopsisDueHours: 24, progressCheckDays: 3 };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-10">
@@ -107,10 +142,190 @@ export default function SettingsPage() {
                   type="number"
                   className="pl-7 bg-background/50 border-border/50"
                   value={formData.defaultBookingAmount}
-                  onChange={e => setFormData({ ...formData, defaultBookingAmount: Number(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, defaultBookingAmount: Number(e.target.value) })}
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Operational Settings — NEW */}
+        <Card className="bg-card border-border/40 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="w-5 h-5 text-status-pending" />
+              <CardTitle>Payment & Reminder Settings</CardTitle>
+            </div>
+            <CardDescription>Control when overdue alerts and reminders trigger.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Payment Reminder After (Days)</label>
+              <p className="text-xs text-muted-foreground">Flag a payment as overdue after this many days.</p>
+              <Input
+                type="number"
+                min={1}
+                max={30}
+                className="bg-background/50 border-border/50 max-w-xs"
+                value={formData.paymentReminderDays ?? 2}
+                onChange={(e) => setFormData({ ...formData, paymentReminderDays: Number(e.target.value) })}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Season Dates */}
+        <Card className="bg-card border-border/40 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <Calendar className="w-5 h-5 text-primary" />
+              <CardTitle>Season Dates</CardTitle>
+            </div>
+            <CardDescription>Define your business season window for smarter alerts.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Season Start</label>
+                <Input
+                  type="date"
+                  className="bg-background/50 border-border/50"
+                  value={formData.seasonStart || ""}
+                  onChange={(e) => setFormData({ ...formData, seasonStart: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Season End</label>
+                <Input
+                  type="date"
+                  className="bg-background/50 border-border/50"
+                  value={formData.seasonEnd || ""}
+                  onChange={(e) => setFormData({ ...formData, seasonEnd: e.target.value })}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Default Task Timings */}
+        <Card className="bg-card border-border/40 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="w-5 h-5 text-status-active" />
+              <CardTitle>Default Task Timings</CardTitle>
+            </div>
+            <CardDescription>Control when auto-generated tasks are due after each trigger.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Follow-up After (Hours)</label>
+                <p className="text-xs text-muted-foreground">When a lead becomes Interested</p>
+                <Input
+                  type="number"
+                  min={1}
+                  className="bg-background/50 border-border/50"
+                  value={taskTimings.followUpHours}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      defaultTaskTimings: { ...taskTimings, followUpHours: Number(e.target.value) },
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Synopsis Due (Hours)</label>
+                <p className="text-xs text-muted-foreground">After order enters Synopsis stage</p>
+                <Input
+                  type="number"
+                  min={1}
+                  className="bg-background/50 border-border/50"
+                  value={taskTimings.synopsisDueHours}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      defaultTaskTimings: { ...taskTimings, synopsisDueHours: Number(e.target.value) },
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Progress Check (Days)</label>
+                <p className="text-xs text-muted-foreground">After order enters Development</p>
+                <Input
+                  type="number"
+                  min={1}
+                  className="bg-background/50 border-border/50"
+                  value={taskTimings.progressCheckDays}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      defaultTaskTimings: { ...taskTimings, progressCheckDays: Number(e.target.value) },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Commission Slabs */}
+        <Card className="bg-card border-border/40 shadow-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2 mb-1">
+              <Trophy className="w-5 h-5 text-yellow-500" />
+              <CardTitle>Commission Slabs</CardTitle>
+            </div>
+            <CardDescription>Auto-commission tiers based on leads converted by partners.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(formData.commissionSlabs || []).map((slab: any, idx: number) => (
+              <div key={idx} className="grid grid-cols-4 gap-3 items-end">
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Min Leads</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    className="bg-background/50 border-border/50 h-8 text-sm"
+                    value={slab.minLeads}
+                    onChange={(e) => updateCommissionSlab(idx, "minLeads", Number(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Max Leads</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    className="bg-background/50 border-border/50 h-8 text-sm"
+                    value={slab.maxLeads}
+                    onChange={(e) => updateCommissionSlab(idx, "maxLeads", Number(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">Commission %</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="bg-background/50 border-border/50 h-8 text-sm"
+                    value={slab.percentage}
+                    onChange={(e) => updateCommissionSlab(idx, "percentage", Number(e.target.value))}
+                  />
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-status-urgent hover:text-status-urgent hover:bg-status-urgent/10"
+                  onClick={() => removeCommissionSlab(idx)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" size="sm" className="mt-2 border-border/50" onClick={addCommissionSlab}>
+              + Add Slab
+            </Button>
           </CardContent>
         </Card>
 
@@ -130,7 +345,7 @@ export default function SettingsPage() {
                 <Input
                   className="bg-background/50 border-border/50"
                   value={template.text}
-                  onChange={e => updateTemplate(template.id, e.target.value)}
+                  onChange={(e) => updateTemplate(template.id, e.target.value)}
                 />
               </div>
             ))}
@@ -154,14 +369,14 @@ export default function SettingsPage() {
                   placeholder="https://n8n.yourdomain.com/webhook/..."
                   className="bg-background/50 border-border/50"
                   value={webhook.url}
-                  onChange={e => {
+                  onChange={(e) => {
                     const exists = formData.webhookUrls?.some((w: any) => w.name === webhook.name);
                     if (exists) {
                       updateWebhook(webhook.name, e.target.value);
                     } else {
                       setFormData((prev: any) => ({
                         ...prev,
-                        webhookUrls: [...(prev.webhookUrls || []), { name: webhook.name, url: e.target.value }]
+                        webhookUrls: [...(prev.webhookUrls || []), { name: webhook.name, url: e.target.value }],
                       }));
                     }
                   }}

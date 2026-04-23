@@ -6,18 +6,37 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Briefcase, Search, LayoutGrid, List, Clock, Loader2 } from "lucide-react";
+import { Briefcase, Search, LayoutGrid, List, Clock, Loader2, Trash2 } from "lucide-react";
+
 import { useState } from "react";
 import { orderBy } from "firebase/firestore";
+import { toast } from "sonner";
+import { deleteActivityLogs } from "@/features/activity";
+
+
 
 export default function ProjectsPage() {
-  const { data: orders, loading } = useFirestore<Order>("orders", [orderBy("createdAt", "desc")]);
+  const { data: orders, loading, remove } = useFirestore<Order>("orders", [orderBy("createdAt", "desc")]);
+
   const [search, setSearch] = useState("");
 
   const filteredOrders = orders.filter(order => 
     order.topic.toLowerCase().includes(search.toLowerCase()) || 
     order.clientName.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleDeleteProject = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    try {
+      await remove(id);
+      await deleteActivityLogs(id);
+      toast.success("Project deleted successfully");
+    } catch {
+
+      toast.error("Failed to delete project");
+    }
+  };
+
 
   return (
     <div className="space-y-6 max-w-[1800px] mx-auto">
@@ -104,9 +123,17 @@ export default function ProjectsPage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="pt-0 border-t border-border/10 p-4">
-                <Button variant="secondary" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+              <CardFooter className="pt-0 border-t border-border/10 p-4 gap-2">
+                <Button variant="secondary" className="flex-1 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   Open Workspace
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-muted-foreground hover:text-status-urgent hover:bg-status-urgent/10 shrink-0"
+                  onClick={() => handleDeleteProject(order.id!)}
+                >
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </CardFooter>
             </Card>

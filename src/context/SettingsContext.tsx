@@ -28,8 +28,16 @@ const defaultSettings: AppSettings = {
   webhookUrls: [],
   founderProfile: { name: "Founder", email: "founder@example.com", phone: "+1234567890" },
   seasonModeEnabled: false,
+  seasonStart: "",
+  seasonEnd: "",
   commissionSlabs: [{ minLeads: 1, maxLeads: 5, percentage: 10 }],
   themePreferences: { primaryColor: "#000000", darkMode: true },
+  paymentReminderDays: 2,
+  defaultTaskTimings: {
+    followUpHours: 2,
+    synopsisDueHours: 24,
+    progressCheckDays: 3,
+  },
 };
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {

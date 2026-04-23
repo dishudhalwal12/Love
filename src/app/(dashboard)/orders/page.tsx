@@ -2,35 +2,52 @@
 
 import { useFirestore } from "@/features/hooks";
 import { Order } from "@/features/types";
+import { onOrderStatusChange } from "@/features/workflow";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, GraduationCap, FileText, ChevronRight, Loader2, Search } from "lucide-react";
+import { Clock, GraduationCap, FileText, ChevronRight, Loader2, Search, AlertTriangle, Trash2 } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { orderBy } from "firebase/firestore";
 import { toast } from "sonner";
 import { OrderDrawer } from "@/components/orders/OrderDrawer";
+import { useSmartSearch } from "@/features/hooks";
+import { deleteActivityLogs } from "@/features/activity";
+
+
+const RISK_FLAG_LABELS: Record<string, string> = {
+  unpaid_near_deadline: "Unpaid + Deadline Near",
+  no_client_reply_5d: "No Reply 5d",
+  status_delay: "Delayed",
+};
 
 export default function OrdersPage() {
-  const { data: orders, loading, update } = useFirestore<Order>("orders", [orderBy("createdAt", "desc")]);
+  const { data: orders, loading, update, remove } = useFirestore<Order>("orders", [orderBy("createdAt", "desc")]);
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [statusChangingId, setStatusChangingId] = useState<string | null>(null);
 
-  const filteredOrders = orders.filter(order =>
-    order.orderId.toLowerCase().includes(search.toLowerCase()) ||
-    order.clientName.toLowerCase().includes(search.toLowerCase()) ||
-    order.topic.toLowerCase().includes(search.toLowerCase())
+  // Fuzzy search across orderId, clientName, topic, college
+  const filteredOrders = useSmartSearch<Order>(
+    orders,
+    ["orderId", "clientName", "topic", "college"],
+    search
   );
 
-  const handleStatusChange = async (id: string, newStatus: string) => {
+  const handleStatusChange = async (order: Order, newStatus: string) => {
+    if (!order.id) return;
+    setStatusChangingId(order.id);
     try {
-      await update(id, { status: newStatus as Order["status"] });
-      toast.success("Order status updated");
-    } catch (err) {
+      await onOrderStatusChange(order, newStatus as Order["status"]);
+      toast.success(`Order moved to ${newStatus}`);
+    } catch {
       toast.error("Failed to update status");
+    } finally {
+      setStatusChangingId(null);
     }
   };
 
@@ -41,8 +58,21 @@ export default function OrdersPage() {
       if (selectedOrder && selectedOrder.id === id) {
         setSelectedOrder({ ...selectedOrder, ...updates });
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to update order");
+    }
+  };
+
+  const handleDeleteOrder = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    try {
+      await remove(id);
+      await deleteActivityLogs(id);
+      toast.success("Order deleted successfully");
+    } catch {
+
+      toast.error("Failed to delete order");
     }
   };
 
@@ -74,7 +104,7 @@ export default function OrdersPage() {
         <div className="relative w-full md:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search Order ID, Client..."
+            placeholder="Search Order ID, Client, Topic..."
             className="pl-8 bg-card border-border/50"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -94,14 +124,28 @@ export default function OrdersPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredOrders.map((order) => {
             const progress = order.amount > 0 ? Math.round((order.amountPaid / order.amount) * 100) : 0;
+            const riskFlags = order.riskFlags || [];
+
             return (
-              <Card key={order.id} className="bg-card border-border/40 hover:border-border/80 transition-all shadow-sm group flex flex-col cursor-pointer" onClick={() => openDrawer(order)}>
+              <Card
+                key={order.id}
+                className="bg-card border-border/40 hover:border-border/80 transition-all shadow-sm group flex flex-col cursor-pointer"
+                onClick={() => openDrawer(order)}
+              >
                 <CardHeader className="p-5 pb-3 shrink-0">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-mono text-sm font-medium text-muted-foreground">{order.orderId}</span>
-                    <Badge variant="outline" className={`border-border/50 font-medium ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      {riskFlags.length > 0 && (
+                        <Badge variant="outline" className="bg-status-urgent/10 text-status-urgent border-status-urgent/30 text-[9px] px-1.5 py-0">
+                          <AlertTriangle className="w-2.5 h-2.5 mr-1" />
+                          {RISK_FLAG_LABELS[riskFlags[0]] || "Risk"}
+                        </Badge>
+                      )}
+                      <Badge variant="outline" className={`border-border/50 font-medium ${getStatusColor(order.status)}`}>
+                        {order.status}
+                      </Badge>
+                    </div>
                   </div>
                   <h3 className="font-semibold text-lg leading-tight line-clamp-1" title={order.topic}>{order.topic}</h3>
                   <p className="text-sm text-muted-foreground">{order.clientName}</p>
@@ -126,16 +170,23 @@ export default function OrdersPage() {
                     </div>
                     <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${progress === 100 ? 'bg-status-success' : 'bg-status-pending'}`}
+                        className={`h-full rounded-full ${progress === 100 ? "bg-status-success" : "bg-status-pending"}`}
                         style={{ width: `${Math.min(progress, 100)}%` }}
                       />
                     </div>
                   </div>
 
-                  <div className="pt-2" onClick={e => e.stopPropagation()}>
-                    <Select value={order.status} onValueChange={(v) => v && handleStatusChange(order.id!, v)}>
+                  <div className="pt-2" onClick={(e) => e.stopPropagation()}>
+                    <Select
+                      value={order.status}
+                      onValueChange={(v) => v && handleStatusChange(order, v)}
+                      disabled={statusChangingId === order.id}
+                    >
                       <SelectTrigger className="h-8 text-xs bg-background/50 border-border/50">
-                        <SelectValue placeholder="Update Status" />
+                        {statusChangingId === order.id
+                          ? <><Loader2 className="w-3 h-3 animate-spin mr-2" />Updating...</>
+                          : <SelectValue placeholder="Update Status" />
+                        }
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Booked">Booked</SelectItem>
@@ -152,8 +203,17 @@ export default function OrdersPage() {
 
                 <CardFooter className="p-5 pt-0 border-t border-border/10 mt-auto flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); openDrawer(order); }}>
+                    <Button
+                      variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={(e) => { e.stopPropagation(); openDrawer(order); }}
+                    >
                       <FileText className="w-3.5 h-3.5 mr-1.5" /> Details
+                    </Button>
+                    <Button
+                      variant="ghost" size="sm" className="h-8 text-xs text-status-urgent hover:text-status-urgent hover:bg-status-urgent/10"
+                      onClick={(e) => handleDeleteOrder(e, order.id!)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
                     </Button>
                   </div>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
