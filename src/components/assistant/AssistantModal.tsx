@@ -31,6 +31,7 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
   
   const { add: addLead } = useFirestore<Lead>("leads");
   const { add: addPayment } = useFirestore<Payment>("payments");
+  const { add: addLog } = useFirestore<ActivityLog>("activity_logs");
   const { data: orders, update: updateOrder } = useFirestore<Order>("orders");
 
   // Reset state when modal opens
@@ -135,6 +136,16 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
           createdAt: Date.now(),
           updatedAt: Date.now(),
         } as Lead);
+
+        // Add to Live Intelligence Feed
+        await addLog({
+          message: `New Lead: ${parsedData.name}`,
+          type: "lead",
+          status: "new",
+          timestamp: Date.now(),
+          meta: { college: parsedData.college }
+        } as ActivityLog);
+
         toast.success(`Lead ${parsedData.name} added!`);
       } else if (parsedData.type === "payment") {
         const order = orders.find(o => o.orderId === parsedData.orderId);
@@ -152,6 +163,16 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
           await updateOrder(order.id!, {
             amountPaid: (order.amountPaid || 0) + parsedData.amount
           });
+
+          // Add to Live Intelligence Feed
+          await addLog({
+            message: `Payment Received: ₹${parsedData.amount}`,
+            type: "payment",
+            status: "success",
+            timestamp: Date.now(),
+            meta: { orderId: parsedData.orderId, client: order.clientName }
+          } as ActivityLog);
+
           toast.success(`Payment of ₹${parsedData.amount} recorded for ${order.orderId}`);
         } else {
           toast.error("Order ID not found.");
