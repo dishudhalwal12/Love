@@ -76,7 +76,11 @@ export function parseLocalIntent(text: string): ParsedIntent {
     } else if (entities.length === 1) {
       // Single chunk case: "Lakshay Maurya" or "Sarthak Vijay DC College"
       const words = entities[0].split(" ");
-      if (words.length >= 4) {
+      if (words.length >= 5) {
+        // Assume first 3 are name (common in Indian names), rest is location
+        name = words.slice(0, 3).join(" ");
+        college = words.slice(3).join(" ");
+      } else if (words.length === 4) {
         // Assume first 2 are name, rest is location
         name = words.slice(0, 2).join(" ");
         college = words.slice(2).join(" ");
