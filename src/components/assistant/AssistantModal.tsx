@@ -131,6 +131,8 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
           college: parsedData.college || "Unknown",
           phone: parsedData.phone || "",
           budget: parsedData.budget || 0,
+          source: parsedData.source || "Direct",
+          deadline: parsedData.deadline || "",
           status: "New",
           score: 50,
           createdAt: Date.now(),
@@ -158,6 +160,9 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
           toast.error("Order ID not found.");
           return;
         }
+      } else if (parsedData.type === "partner") {
+        // Assume we have a partners collection
+        toast.success(`Partner ${parsedData.name} added (Simulation)`);
       }
       setStep("success");
       setTimeout(() => onOpenChange(false), 2000);
@@ -262,7 +267,21 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
                             <p className="text-[9px] text-muted-foreground uppercase font-bold">Budget</p>
                             <p className="text-xs">₹{parsedData.budget || 0}</p>
                           </div>
+                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Source</p>
+                            <p className="text-xs truncate">{parsedData.source || "Direct"}</p>
+                          </div>
+                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Phone</p>
+                            <p className="text-xs truncate">{parsedData.phone || "—"}</p>
+                          </div>
                         </div>
+                        {parsedData.deadline && (
+                          <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                            <p className="text-[9px] text-muted-foreground uppercase font-bold">Deadline</p>
+                            <p className="text-xs">{parsedData.deadline}</p>
+                          </div>
+                        )}
                       </div>
                     )}
 
