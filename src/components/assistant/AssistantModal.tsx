@@ -34,6 +34,17 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
   const { add: addPayment } = useFirestore<Payment>("payments");
   const { data: orders, update: updateOrder } = useFirestore<Order>("orders");
 
+  // Reset state when modal opens
+  useEffect(() => {
+    if (open) {
+      setStep("idle");
+      setTranscript("");
+      setParsedData(null);
+      setIsListening(false);
+      setIsProcessing(false);
+    }
+  }, [open]);
+
   // Local Whisper ML
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [isModelLoading, setIsModelLoading] = useState(false);
@@ -183,9 +194,6 @@ export function AssistantModal({ open, onOpenChange }: AssistantModalProps) {
               </div>
               <DialogTitle className="text-xl font-bold tracking-tight">AI Assistant</DialogTitle>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="rounded-full">
-              <X className="w-4 h-4" />
-            </Button>
           </div>
 
           <div className="min-h-[200px] flex flex-col items-center justify-center space-y-8 py-4">
