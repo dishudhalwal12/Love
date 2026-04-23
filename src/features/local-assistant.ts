@@ -38,8 +38,8 @@ export function parseLocalIntent(text: string): ParsedIntent {
   }
 
   // 2. LEAD DETECTION
-  // Patterns: "New lead...", "Lead of...", "There is a lead...", "[Name] from [College]", etc.
-  if (/\b(lead|enquiry|contact|interested|student)\b/i.test(input) || (input.includes("from") && input.split(" ").length > 3)) {
+  // Optimized for phrases like: "There is a new lead Lakshay Maurya from gym Vasant Kunj"
+  if (/\b(lead|enquiry|contact|interested|student|person|guy|girl|got|new)\b/i.test(input) || (input.includes("from") && input.split(" ").length > 3)) {
     let name = "";
     let college = "";
     let phone = "";
@@ -50,7 +50,7 @@ export function parseLocalIntent(text: string): ParsedIntent {
     const phoneMatch = input.match(/\b(\d{10})\b/);
     if (phoneMatch) phone = phoneMatch[1];
 
-    // Extract Source (Instagram, Partner Name, etc.)
+    // Extract Source
     const sourceMatch = input.match(/(?:from|source|via)\s+(instagram|whatsapp|facebook|partner|referral)/i);
     if (sourceMatch) source = sourceMatch[1];
 
@@ -58,36 +58,34 @@ export function parseLocalIntent(text: string): ParsedIntent {
     const deadlineMatch = input.match(/(?:deadline|by|before|date)\s+(?:is\s+)?(.+?)(?:\s|$)/i);
     if (deadlineMatch) deadline = deadlineMatch[1];
 
-    // Extract Name and College
-    // "New lead Divyanshu Saini from JIMS College"
-    const leadPatterns = [
-      /(?:new lead|lead|contact|student|enquiry|interested|person|guy|girl)\s+(?:of|is)?\s+(.+?)\s+(?:from|at|in|of|belongs to|studying at)\s+(.+?)(?:\s+|$)/i,
-      /(.+?)\s+(?:from|at|in)\s+(.+?)\s+(?:is a new lead|interested|wants to join|contacted)/i,
-      /(?:add|create|record|save)\s+(?:a)?\s+lead\s+(?:for)?\s+(.+?)\s+(?:from|at|in)\s+(.+?)/i,
-      /(?:got a)?\s+new\s+(.+?)\s+(?:from|at|in)\s+(.+?)/i,
-      /(.+?)\s+(?:of|from)\s+(.+?)\s+(?:is interested)/i
-    ];
-
-    for (const pattern of leadPatterns) {
-      const match = input.match(pattern);
-      if (match) {
-        name = match[1];
-        college = match[2];
-        break;
+    // Extract Name and College with extreme flexibility
+    const cleanInput = input.replace(/\b(there|is|a|got|record|save|add|create|new|lead|enquiry|contact|interested|of|for)\b/gi, "").trim();
+    
+    // Pattern: [Name] from [Location]
+    if (cleanInput.includes("from")) {
+      const parts = cleanInput.split(/\s+from\s+/i);
+      if (parts.length >= 2) {
+        name = parts[0].trim();
+        college = parts[1].split(/\b(by|at|source|via|deadline|on|with|phone|mobile)\b/i)[0].trim();
+      }
+    } else if (cleanInput.includes("at")) {
+      const parts = cleanInput.split(/\s+at\s+/i);
+      if (parts.length >= 2) {
+        name = parts[0].trim();
+        college = parts[1].trim();
+      }
+    } else {
+      // Fallback: take first two words as name if no location found
+      const words = cleanInput.split(" ");
+      if (words.length >= 2) {
+        name = words[0] + " " + words[1];
+        college = words.slice(2).join(" ");
       }
     }
 
-    if (!name && input.includes("from")) {
-      const parts = input.split("from");
-      name = parts[0].replace(/\b(new|lead|there|is|a|of|got|enquiry|contact)\b/gi, "").trim();
-      college = parts[1].split(/\b(by|at|source|via|deadline|on|with|phone|mobile)\b/i)[0].trim();
-    }
-
-    if (!name) name = input.replace(/\b(new|lead|add|create|a|of|there|is|got|save|record)\b/gi, "").split(" ")[0];
-
     const capitalize = (s: string) => s.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     
-    if (name) {
+    if (name && name.length > 2) {
       return {
         type: "lead",
         name: capitalize(name),
