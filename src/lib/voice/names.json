@@ -1,0 +1,15 @@
+{
+  "firstNames": [
+    "Aarav", "Aaryan", "Abhishek", "Aditya", "Akash", "Aman", "Amit", "Ananya", "Anjali", "Ankit",
+    "Ansh", "Arjun", "Aryan", "Ayush", "Deepak", "Dev", "Divyanshu", "Gaurav", "Harsh", "Ishaan",
+    "Kabir", "Karan", "Kartik", "Khushi", "Krishna", "Lakshya", "Manish", "Mohit", "Muskan", "Naman",
+    "Nitin", "Pankaj", "Pranav", "Priyanka", "Rahul", "Rajat", "Rajesh", "Rishabh", "Rohan", "Rohit",
+    "Sagar", "Sahil", "Sameer", "Sandeep", "Sarthak", "Shivam", "Shubham", "Sneha", "Sumit", "Tushar",
+    "Varun", "Vikas", "Vishal", "Yash"
+  ],
+  "lastNames": [
+    "Agarwal", "Bansal", "Chaudhary", "Chauhan", "Gupta", "Jain", "Jha", "Kapoor", "Khan", "Kumar",
+    "Malhotra", "Maurya", "Mehta", "Mishra", "Pandey", "Patel", "Prasad", "Rai", "Rajput", "Saini",
+    "Sharma", "Singh", "Srivastava", "Tyagi", "Verma", "Yadav"
+  ]
+}

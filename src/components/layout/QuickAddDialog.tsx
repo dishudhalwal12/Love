@@ -15,14 +15,31 @@ import {
   CheckSquare, 
   CreditCard, 
   ArrowRight,
-  Plus
+  Plus,
+  Sparkles
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function QuickAddDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function QuickAddDialog({ 
+  open, 
+  onOpenChange,
+  onOpenAssistant
+}: { 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void;
+  onOpenAssistant: () => void;
+}) {
   const router = useRouter();
 
   const actions = [
+    {
+      title: "AI Assistant",
+      desc: "Voice commands for leads, payments & more.",
+      icon: Sparkles,
+      isAssistant: true,
+      color: "text-primary",
+      bg: "bg-primary/10"
+    },
     {
       title: "Add New Lead",
       desc: "Capture a new potential client.",
@@ -63,7 +80,11 @@ export function QuickAddDialog({ open, onOpenChange }: { open: boolean; onOpenCh
             <button
               key={action.title}
               onClick={() => {
-                router.push(action.href);
+                if ((action as any).isAssistant) {
+                  onOpenAssistant();
+                } else {
+                  router.push((action as any).href);
+                }
                 onOpenChange(false);
               }}
               className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] transition-all text-left group"

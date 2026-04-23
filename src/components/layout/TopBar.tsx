@@ -7,6 +7,7 @@ import { Search, Bell, Plus, LogOut, Clock, Sun, Moon, Sunset, Sunrise } from "l
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/ui/GlobalSearch";
 import { QuickAddDialog } from "./QuickAddDialog";
+import { AssistantModal } from "@/components/assistant/AssistantModal";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 export function TopBar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
 
   const [time, setTime] = useState(new Date());
 
@@ -86,7 +88,12 @@ export function TopBar() {
       </header>
 
       <GlobalSearch open={searchOpen} setOpen={setSearchOpen} />
-      <QuickAddDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
+      <QuickAddDialog 
+        open={quickAddOpen} 
+        onOpenChange={setQuickAddOpen} 
+        onOpenAssistant={() => setAssistantOpen(true)}
+      />
+      <AssistantModal open={assistantOpen} onOpenChange={setAssistantOpen} />
     </>
   );
 }

@@ -1,0 +1,29 @@
+{
+  "colleges": [
+    "JIMS",
+    "JIMS Vasant Kunj",
+    "VIPS",
+    "DCSE",
+    "DU",
+    "IPU",
+    "IIT Delhi",
+    "DTU",
+    "NSUT",
+    "MAIT",
+    "MSIT",
+    "BVP",
+    "Amity",
+    "LPU",
+    "SRM",
+    "VIT",
+    "Manipal"
+  ],
+  "synonyms": {
+    "gyms": "JIMS",
+    "vips": "VIPS",
+    "du": "DU",
+    "ipu": "IPU",
+    "dce": "DCSE",
+    "dcse": "DCSE"
+  }
+}
