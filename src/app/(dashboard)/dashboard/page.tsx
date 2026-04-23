@@ -235,62 +235,65 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        <div className="xl:col-span-3 space-y-4">
-          <Card className="rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col relative overflow-hidden group">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 md:gap-6">
+
+        {/* LEFT: KPI Cards */}
+        <div className="xl:col-span-3 flex flex-row xl:flex-col gap-4 overflow-x-auto xl:overflow-x-visible pb-2 xl:pb-0 scrollbar-hide snap-x">
+          <Card className="min-w-[240px] xl:min-w-0 flex-1 rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col relative overflow-hidden group snap-center">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent pointer-events-none" />
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground tracking-tight">Revenue Today</CardTitle>
+            <CardHeader className="pb-1 md:pb-2">
+              <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground tracking-tight">Revenue Today</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold text-white group-hover:scale-105 transition-transform origin-left">₹{revenueToday}</div>
+              <div className="text-2xl md:text-3xl font-semibold text-white group-hover:scale-105 transition-transform origin-left">₹{revenueToday}</div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground tracking-tight">New Leads Today</CardTitle>
+          <Card className="min-w-[200px] xl:min-w-0 flex-1 rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group snap-center">
+            <CardHeader className="pb-1 md:pb-2">
+              <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground tracking-tight">New Leads Today</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold group-hover:scale-105 transition-transform origin-left">{todayLeads}</div>
+              <div className="text-2xl md:text-3xl font-semibold group-hover:scale-105 transition-transform origin-left">{todayLeads}</div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground tracking-tight">Pending Collections</CardTitle>
+          <Card className="min-w-[240px] xl:min-w-0 flex-1 rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group snap-center">
+            <CardHeader className="pb-1 md:pb-2">
+              <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground tracking-tight">Pending Collections</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold text-white group-hover:scale-105 transition-transform origin-left">₹{pendingCollections}</div>
+              <div className="text-2xl md:text-3xl font-semibold text-white group-hover:scale-105 transition-transform origin-left">₹{pendingCollections}</div>
             </CardContent>
           </Card>
 
-          <Card className="rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground tracking-tight">Active Projects</CardTitle>
+          <Card className="min-w-[200px] xl:min-w-0 flex-1 rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group snap-center">
+            <CardHeader className="pb-1 md:pb-2">
+              <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground tracking-tight">Active Projects</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold group-hover:scale-105 transition-transform origin-left">{activeProjects}</div>
+              <div className="text-2xl md:text-3xl font-semibold group-hover:scale-105 transition-transform origin-left">{activeProjects}</div>
               {overdueTasks > 0 && (
-                <div className="flex items-center gap-1 text-xs text-status-urgent mt-1">
+                <div className="flex items-center gap-1 text-[10px] text-status-urgent mt-1">
                   <BellRing className="w-3 h-3" /> {overdueTasks} task{overdueTasks > 1 ? "s" : ""} overdue
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground tracking-tight">Pending Projects</CardTitle>
+          <Card className="min-w-[200px] xl:min-w-0 flex-1 rounded-xl border-white/[0.05] bg-card/50 backdrop-blur-sm shadow-sm flex flex-col group snap-center">
+            <CardHeader className="pb-1 md:pb-2">
+              <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground tracking-tight">Pending Projects</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-semibold group-hover:scale-105 transition-transform origin-left">{pendingProjects}</div>
+              <div className="text-2xl md:text-3xl font-semibold group-hover:scale-105 transition-transform origin-left">{pendingProjects}</div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="xl:col-span-6 space-y-6 flex flex-col h-full">
-          <Card className="rounded-xl border-white/[0.05] bg-card/30 shadow-sm flex flex-col h-[300px]">
+        <div className="xl:col-span-6 space-y-4 md:space-y-6 flex flex-col h-full">
+          {/* Live Intelligence Feed */}
+          <Card className="rounded-xl border-white/[0.05] bg-card/30 shadow-sm flex flex-col h-[350px] md:h-[300px]">
             <CardHeader className="pb-4">
               <div className="flex items-center gap-2">
                 <div className="relative flex h-2 w-2">
@@ -423,7 +426,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <div className="xl:col-span-3 space-y-6 flex flex-col h-full">
+        <div className="xl:col-span-3 space-y-4 md:space-y-6 flex flex-col h-full pb-8 md:pb-0">
           <Card className="rounded-xl border-white/[0.05] bg-card/30 shadow-sm flex flex-col">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>

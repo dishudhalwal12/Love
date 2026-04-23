@@ -149,13 +149,13 @@ export default function PaymentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Payments</h2>
-          <p className="text-sm text-muted-foreground mt-1">Manage revenue and pending collections.</p>
+          <p className="text-sm text-muted-foreground mt-1">Manage revenue and collections.</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger render={<Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2" />}>
+          <DialogTrigger render={<Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 w-full sm:w-auto h-11 sm:h-9" />}>
             <Plus className="w-4 h-4" /> Add Payment
           </DialogTrigger>
           <DialogContent className="sm:max-w-[440px] bg-card border-border/50">
@@ -257,131 +257,185 @@ export default function PaymentsPage() {
 
       {/* Overdue alert banner */}
       {overdueOrders.length > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-lg border border-status-urgent/30 bg-status-urgent/5 text-status-urgent text-sm">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>
-            <span className="font-semibold">{overdueOrders.length} order(s)</span> have payments pending for more than {reminderDays} days:{" "}
-            {overdueOrders.slice(0, 3).map((o) => o.orderId).join(", ")}
-            {overdueOrders.length > 3 ? ` +${overdueOrders.length - 3} more` : ""}
-          </span>
+        <div className="flex items-start gap-3 p-3 rounded-2xl border border-status-urgent/30 bg-status-urgent/5 text-status-urgent text-xs animate-in fade-in slide-in-from-top-2">
+          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+          <div className="flex-1 leading-relaxed">
+            <span className="font-bold">{overdueOrders.length} order(s)</span> are overdue:{" "}
+            <span className="opacity-80">
+              {overdueOrders.slice(0, 3).map((o) => o.orderId).join(", ")}
+              {overdueOrders.length > 3 ? ` +${overdueOrders.length - 3} more` : ""}
+            </span>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-card border-border/40 shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4 space-y-0">
-            <CardTitle className="text-xs font-medium text-muted-foreground">Collected Today</CardTitle>
-            <DollarSign className="w-4 h-4 text-status-success" />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+        <Card className="bg-card border-border/40 shadow-none rounded-2xl overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 pt-3 md:pt-4 px-3 md:px-4 space-y-0">
+            <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider font-bold">Today</CardTitle>
+            <DollarSign className="w-3.5 h-3.5 text-status-success" />
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-2xl font-semibold">₹{collectedToday}</div>
+          <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="text-xl md:text-2xl font-bold">₹{collectedToday}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border/40 shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4 space-y-0">
-            <CardTitle className="text-xs font-medium text-muted-foreground">Pending Collections</CardTitle>
-            <RefreshCcw className="w-4 h-4 text-status-pending" />
+        <Card className="bg-card border-border/40 shadow-none rounded-2xl overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 pt-3 md:pt-4 px-3 md:px-4 space-y-0">
+            <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider font-bold">Pending</CardTitle>
+            <RefreshCcw className="w-3.5 h-3.5 text-status-pending" />
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-2xl font-semibold">₹{pendingTotal}</div>
-            {overdueOrders.length > 0 && (
-              <div className="text-xs text-status-urgent mt-1 flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> {overdueOrders.length} overdue
-              </div>
-            )}
+          <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="text-xl md:text-2xl font-bold">₹{pendingTotal}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border/40 shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4 space-y-0">
-            <CardTitle className="text-xs font-medium text-muted-foreground">This Month</CardTitle>
-            <CalendarDays className="w-4 h-4 text-primary" />
+        <Card className="bg-card border-border/40 shadow-none rounded-2xl overflow-hidden col-span-2 md:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 pt-3 md:pt-4 px-3 md:px-4 space-y-0">
+            <CardTitle className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider font-bold">This Month</CardTitle>
+            <CalendarDays className="w-3.5 h-3.5 text-primary" />
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-2xl font-semibold">₹{thisMonth}</div>
+          <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="text-xl md:text-2xl font-bold">₹{thisMonth}</div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="border border-border/50 rounded-lg overflow-hidden bg-card mt-6">
-        <div className="px-4 py-3 border-b border-border/50 bg-muted/10">
-          <h3 className="font-medium">Recent Transactions</h3>
+      <div className="mt-6">
+        <div className="px-1 md:px-4 py-3 flex items-center justify-between mb-4">
+          <h3 className="font-bold tracking-tight text-white uppercase text-xs tracking-[0.2em]">Recent Transactions</h3>
         </div>
-        <Table>
-          <TableHeader className="bg-muted/30">
-            <TableRow className="border-border/50 hover:bg-transparent">
-              <TableHead className="font-medium">TX ID</TableHead>
-              <TableHead className="font-medium">Order</TableHead>
-              <TableHead className="font-medium">Client</TableHead>
-              <TableHead className="font-medium">Amount</TableHead>
-              <TableHead className="font-medium">Method</TableHead>
-              <TableHead className="font-medium">Date</TableHead>
-              <TableHead className="font-medium">Status</TableHead>
-              <TableHead className="font-medium text-right">Actions</TableHead>
-            </TableRow>
 
-          </TableHeader>
-          <TableBody>
-            {paymentsLoading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
-                </TableCell>
+        <div className="hidden md:block border border-border/50 rounded-2xl overflow-hidden bg-card shadow-sm">
+          <Table>
+            <TableHeader className="bg-muted/30">
+              <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="font-medium">TX ID</TableHead>
+                <TableHead className="font-medium">Order</TableHead>
+                <TableHead className="font-medium">Client</TableHead>
+                <TableHead className="font-medium">Amount</TableHead>
+                <TableHead className="font-medium">Method</TableHead>
+                <TableHead className="font-medium">Date</TableHead>
+                <TableHead className="font-medium">Status</TableHead>
+                <TableHead className="font-medium text-right">Actions</TableHead>
               </TableRow>
-            ) : payments.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                  No payments found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              payments.map((tx) => (
-                <TableRow key={tx.id} className="border-border/50 hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-mono text-xs text-muted-foreground">TX-{tx.id?.slice(0, 6)}</TableCell>
-                  <TableCell className="font-medium">{tx.orderId}</TableCell>
-                  <TableCell className="text-muted-foreground">{tx.clientName}</TableCell>
-                  <TableCell className="font-medium">₹{tx.amount}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                      <Wallet className="w-3.5 h-3.5" />
-                      <span>{tx.method}</span>
+            </TableHeader>
+            <TableBody>
+              {paymentsLoading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
+                  </TableCell>
+                </TableRow>
+              ) : payments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                    No payments found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                payments.map((tx) => (
+                  <TableRow key={tx.id} className="border-border/50 hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-mono text-xs text-muted-foreground">TX-{tx.id?.slice(0, 6)}</TableCell>
+                    <TableCell className="font-medium">{tx.orderId}</TableCell>
+                    <TableCell className="text-muted-foreground">{tx.clientName}</TableCell>
+                    <TableCell className="font-medium text-foreground font-bold">₹{tx.amount}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                        <Wallet className="w-3.5 h-3.5" />
+                        <span>{tx.method}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {format(new Date(tx.paidAt), "MMM dd, yyyy")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="secondary"
+                        className={`font-bold text-[10px] uppercase tracking-wider ${
+                          tx.status === "Paid"
+                            ? "bg-status-success/20 text-status-success border-status-success/30"
+                            : tx.status === "Pending"
+                            ? "bg-status-pending/20 text-status-pending border-status-pending/30"
+                            : "bg-status-urgent/20 text-status-urgent border-status-urgent/30"
+                        } border`}
+                      >
+                        {tx.status === "Paid" && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                        {tx.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-status-urgent hover:bg-status-urgent/10"
+                        onClick={() => handleDeletePayment(tx.id!)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="md:hidden space-y-3">
+          {paymentsLoading ? (
+            <div className="flex items-center justify-center h-48">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : payments.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl border border-dashed border-border/50">
+              No payments found.
+            </div>
+          ) : (
+            payments.map((tx) => (
+              <Card key={tx.id} className="bg-card/50 border-white/[0.05] rounded-2xl overflow-hidden shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-white text-base">₹{tx.amount}</span>
+                        <Badge
+                          variant="secondary"
+                          className={`text-[9px] px-1.5 py-0 rounded-full font-bold uppercase tracking-wider ${
+                            tx.status === "Paid" ? "bg-status-success/20 text-status-success" : "bg-status-pending/20 text-status-pending"
+                          }`}
+                        >
+                          {tx.status}
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                        {tx.orderId} · {tx.clientName}
+                      </p>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {format(new Date(tx.paidAt), "MMM dd, yyyy")}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className={`font-medium ${
-                        tx.status === "Paid"
-                          ? "bg-status-success/20 text-status-success border-status-success/30"
-                          : tx.status === "Pending"
-                          ? "bg-status-pending/20 text-status-pending border-status-pending/30"
-                          : "bg-status-urgent/20 text-status-urgent border-status-urgent/30"
-                      } border`}
-                    >
-                      {tx.status === "Paid" && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                      {tx.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
+                    <div className="text-[10px] text-muted-foreground text-right">
+                      {format(new Date(tx.paidAt), "MMM dd, hh:mm a")}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium">
+                      <Wallet className="w-3 h-3" /> {tx.method}
+                      {tx.note && <span className="opacity-60 italic">· {tx.note}</span>}
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-status-urgent hover:bg-status-urgent/10"
+                      className="h-7 w-7 text-status-urgent hover:bg-status-urgent/10"
                       onClick={() => handleDeletePayment(tx.id!)}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
-                  </TableCell>
-                </TableRow>
-
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          ))}
+        </div>
       </div>
     </div>
   );

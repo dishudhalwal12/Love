@@ -96,16 +96,16 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6 max-w-[1800px] mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Orders</h2>
           <p className="text-sm text-muted-foreground mt-1">Track and manage active assignments.</p>
         </div>
-        <div className="relative w-full md:w-64">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search Order ID, Client, Topic..."
-            className="pl-8 bg-card border-border/50"
+            placeholder="Search Order ID, Client..."
+            className="pl-8 bg-card border-border/50 h-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -132,48 +132,49 @@ export default function OrdersPage() {
                 className="bg-card border-border/40 hover:border-border/80 transition-all shadow-sm group flex flex-col cursor-pointer"
                 onClick={() => openDrawer(order)}
               >
-                <CardHeader className="p-5 pb-3 shrink-0">
+                <CardHeader className="p-4 md:p-5 pb-2 md:pb-3 shrink-0">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-sm font-medium text-muted-foreground">{order.orderId}</span>
+                    <span className="font-mono text-[10px] md:text-sm font-medium text-muted-foreground">{order.orderId}</span>
                     <div className="flex items-center gap-1.5">
                       {riskFlags.length > 0 && (
-                        <Badge variant="outline" className="bg-status-urgent/10 text-status-urgent border-status-urgent/30 text-[9px] px-1.5 py-0">
-                          <AlertTriangle className="w-2.5 h-2.5 mr-1" />
+                        <Badge variant="outline" className="bg-status-urgent/10 text-status-urgent border-status-urgent/30 text-[8px] md:text-[9px] px-1.5 py-0">
+                          <AlertTriangle className="w-2 h-2 md:w-2.5 md:h-2.5 mr-1" />
                           {RISK_FLAG_LABELS[riskFlags[0]] || "Risk"}
                         </Badge>
                       )}
-                      <Badge variant="outline" className={`border-border/50 font-medium ${getStatusColor(order.status)}`}>
+                      <Badge variant="outline" className={`border-border/50 text-[10px] md:text-xs font-medium ${getStatusColor(order.status)}`}>
                         {order.status}
                       </Badge>
                     </div>
                   </div>
-                  <h3 className="font-semibold text-lg leading-tight line-clamp-1" title={order.topic}>{order.topic}</h3>
-                  <p className="text-sm text-muted-foreground">{order.clientName}</p>
+                  <h3 className="font-semibold text-base md:text-lg leading-tight line-clamp-1" title={order.topic}>{order.topic}</h3>
+                  <p className="text-[11px] md:text-sm text-muted-foreground">{order.clientName}</p>
                 </CardHeader>
 
-                <CardContent className="p-5 pt-0 space-y-4 flex-1">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <CardContent className="p-4 md:p-5 pt-0 space-y-3 md:space-y-4 flex-1">
+                  <div className="flex items-center gap-4 text-[11px] md:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <GraduationCap className="w-4 h-4" />
-                      <span className="truncate">{order.college}</span>
+                      <GraduationCap className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                      <span className="truncate max-w-[100px] md:max-w-none">{order.college}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
+                      <Clock className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       <span>{order.deadline}</span>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground font-medium">Payment Status</span>
-                      <span className="font-medium text-foreground">{progress}% Paid (₹{order.amountPaid}/₹{order.amount})</span>
+                    <div className="flex items-center justify-between text-[10px] md:text-xs">
+                      <span className="text-muted-foreground font-medium uppercase tracking-wider">Payment Status</span>
+                      <span className="font-bold text-foreground">{progress}%</span>
                     </div>
-                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className="w-full h-1 md:h-1.5 bg-white/5 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${progress === 100 ? "bg-status-success" : "bg-status-pending"}`}
+                        className={`h-full rounded-full transition-all duration-700 ${progress === 100 ? "bg-status-success" : "bg-emerald-500"}`}
                         style={{ width: `${Math.min(progress, 100)}%` }}
                       />
                     </div>
+                    <div className="text-[10px] text-muted-foreground/60 text-right font-medium">₹{order.amountPaid} / ₹{order.amount}</div>
                   </div>
 
                   <div className="pt-2" onClick={(e) => e.stopPropagation()}>
@@ -201,19 +202,19 @@ export default function OrdersPage() {
                   </div>
                 </CardContent>
 
-                <CardFooter className="p-5 pt-0 border-t border-border/10 mt-auto flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <CardFooter className="p-4 md:p-5 pt-0 border-t border-white/[0.05] mt-auto flex justify-between items-center md:opacity-0 md:group-hover:opacity-100 transition-all">
                   <div className="flex gap-2">
                     <Button
-                      variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                      variant="ghost" size="sm" className="h-8 text-[10px] md:text-xs text-muted-foreground hover:text-foreground uppercase font-bold tracking-wider"
                       onClick={(e) => { e.stopPropagation(); openDrawer(order); }}
                     >
-                      <FileText className="w-3.5 h-3.5 mr-1.5" /> Details
+                      <FileText className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1.5" /> Details
                     </Button>
                     <Button
-                      variant="ghost" size="sm" className="h-8 text-xs text-status-urgent hover:text-status-urgent hover:bg-status-urgent/10"
+                      variant="ghost" size="sm" className="h-8 text-[10px] md:text-xs text-status-urgent hover:text-status-urgent hover:bg-status-urgent/10 uppercase font-bold tracking-wider"
                       onClick={(e) => handleDeleteOrder(e, order.id!)}
                     >
-                      <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
+                      <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1.5" /> Delete
                     </Button>
                   </div>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">

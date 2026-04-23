@@ -370,19 +370,19 @@ export default function LeadsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-        <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search name, phone, college..."
-              className="pl-8 bg-card border-border/50"
+              placeholder="Search name, phone..."
+              className="pl-8 bg-card border-border/50 h-10"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto w-full pb-2 sm:pb-0">
-            <div className="flex items-center gap-2 px-3 py-1.5 border border-border rounded-md bg-muted/30 text-muted-foreground text-sm font-medium shrink-0">
-              <Filter className="w-4 h-4" /> Filters
+          <div className="flex items-center gap-2 overflow-x-auto w-full pb-2 sm:pb-0 scrollbar-hide">
+            <div className="flex items-center gap-2 px-3 py-1.5 border border-border rounded-full bg-muted/30 text-muted-foreground text-[10px] uppercase font-bold shrink-0">
+              <Filter className="w-3 h-3" /> Filters
             </div>
             {filters.map((f) => (
               <Button
@@ -390,7 +390,7 @@ export default function LeadsPage() {
                 variant={filter === f ? "secondary" : "outline"}
                 size="sm"
                 onClick={() => setFilter(f)}
-                className={`shrink-0 rounded-full border-border/50 ${filter === f ? "bg-primary/10 text-primary hover:bg-primary/20 border-primary/20" : "bg-card hover:bg-muted"}`}
+                className={`shrink-0 h-8 rounded-full border-border/50 text-[10px] uppercase tracking-wider font-bold ${filter === f ? "bg-primary/10 text-primary hover:bg-primary/20 border-primary/20" : "bg-card hover:bg-muted"}`}
               >
                 {f}
               </Button>
@@ -399,22 +399,22 @@ export default function LeadsPage() {
         </div>
 
         {selectedLeads.length > 0 && (
-          <div className="flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
-            <Badge variant="secondary" className="mr-2">{selectedLeads.length} Selected</Badge>
-            <Button variant="outline" size="sm" onClick={() => toast.info("Reminder sent")} className="h-8">
-              <BellRing className="w-4 h-4 mr-2" /> Remind
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+            <Badge variant="secondary" className="mr-1 h-7 shrink-0">{selectedLeads.length} Selected</Badge>
+            <Button variant="outline" size="sm" onClick={() => toast.info("Reminder sent")} className="h-8 shrink-0 text-[10px] uppercase font-bold">
+              <BellRing className="w-3 h-3 mr-1.5" /> Remind
             </Button>
-            <Button variant="outline" size="sm" onClick={handleBulkMarkLost} className="h-8 text-status-urgent hover:text-status-urgent hover:bg-status-urgent/10">
-              <UserMinus className="w-4 h-4 mr-2" /> Mark Lost
+            <Button variant="outline" size="sm" onClick={handleBulkMarkLost} className="h-8 shrink-0 text-status-urgent hover:text-status-urgent hover:bg-status-urgent/10 text-[10px] uppercase font-bold">
+              <UserMinus className="w-3 h-3 mr-1.5" /> Mark Lost
             </Button>
-            <Button variant="outline" size="sm" onClick={handleBulkExportCSV} className="h-8">
-              <Download className="w-4 h-4 mr-2" /> CSV
+            <Button variant="outline" size="sm" onClick={handleBulkExportCSV} className="h-8 shrink-0 text-[10px] uppercase font-bold">
+              <Download className="w-3 h-3 mr-1.5" /> CSV
             </Button>
           </div>
         )}
       </div>
 
-      <div className="border border-border/50 rounded-lg overflow-hidden bg-card shadow-sm">
+      <div className="hidden md:block border border-border/50 rounded-lg overflow-hidden bg-card shadow-sm">
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="border-border/50 hover:bg-transparent">
@@ -530,7 +530,6 @@ export default function LeadsPage() {
                       <Button variant="ghost" size="icon" onClick={() => handleDeleteLead(lead.id!)} className="h-8 w-8 text-muted-foreground hover:text-status-urgent" title="Delete">
                         <Trash2 className="w-4 h-4" />
                       </Button>
-
                     </div>
                   </TableCell>
                 </TableRow>
@@ -538,6 +537,108 @@ export default function LeadsPage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="flex items-center justify-center h-48">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredLeads.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground bg-card rounded-2xl border border-dashed border-border/50">
+            No leads found.
+          </div>
+        ) : (
+          filteredLeads.map((lead) => (
+            <Card key={lead.id} className="bg-card/50 border-white/[0.05] rounded-2xl overflow-hidden shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      checked={selectedLeads.includes(lead.id!)}
+                      onCheckedChange={() => toggleSelect(lead.id!)}
+                      className="mt-1"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-white leading-tight">{lead.name}</h3>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">{lead.college}</p>
+                    </div>
+                  </div>
+                  <Select
+                    value={lead.status}
+                    onValueChange={(v) => v && handleStatusChange(lead, v as Lead["status"])}
+                    disabled={statusChangingId === lead.id}
+                  >
+                    <SelectTrigger className="h-auto p-0 border-0 bg-transparent shadow-none focus:ring-0 w-auto">
+                      <Badge
+                        variant="secondary"
+                        className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${
+                          lead.status === "Booked" ? "bg-status-success/20 text-status-success border-status-success/20" :
+                          lead.status === "New" ? "bg-status-active/20 text-status-active border-status-active/20" :
+                          lead.status === "Lost" ? "bg-muted text-muted-foreground border-border/50" :
+                          "bg-primary/20 text-primary border-primary/20"
+                        } border`}
+                      >
+                        {statusChangingId === lead.id ? <Loader2 className="w-3 h-3 animate-spin" /> : lead.status}
+                      </Badge>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="New">New</SelectItem>
+                      <SelectItem value="Contacted">Contacted</SelectItem>
+                      <SelectItem value="Interested">Interested</SelectItem>
+                      <SelectItem value="Negotiating">Negotiating</SelectItem>
+                      <SelectItem value="Booked">Booked (Convert)</SelectItem>
+                      <SelectItem value="Lost">Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.05]">
+                  <div className="flex gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold">Budget</span>
+                      <span className="text-xs font-semibold text-white">₹{lead.budget}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold">Intent</span>
+                      <span className="text-xs font-semibold">{lead.priorityScore ?? lead.score}%</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8 rounded-full bg-white/5 border border-white/10"
+                      onClick={() => lead.phone && (window.location.href = `tel:${lead.phone}`)}
+                      disabled={!lead.phone}
+                    >
+                      <Phone className="w-3.5 h-3.5 text-white" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                      onClick={() => lead.phone && window.open(`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}`, "_blank")}
+                      disabled={!lead.phone}
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-emerald-500" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8 rounded-full bg-white/5 border border-white/10"
+                      onClick={() => handleDeleteLead(lead.id!)}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-status-urgent" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );
